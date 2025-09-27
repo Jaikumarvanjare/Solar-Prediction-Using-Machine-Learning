@@ -46,7 +46,7 @@ The project uses the **Solar Prediction Dataset**, which contains key attributes
 
 ### 1️⃣ Clone the Repository
 ```bash
-git clone https://github.com/yajasarora/Solar-Energy-Prediction.git
+git clone https://github.com/Jaikumarvanjare/Solar-Prediction-Using-Machine-Learning.git
 cd Solar-Energy-Prediction
 ```
 
