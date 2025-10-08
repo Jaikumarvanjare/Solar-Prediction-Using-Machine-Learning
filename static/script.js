@@ -85,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- API Call to Backend ---
         try {
-            // IMPORTANT: The URL for the API endpoint is now just /predict
             const response = await fetch('/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -153,5 +152,4 @@ document.addEventListener('DOMContentLoaded', () => {
         getWeatherButton.textContent = isLoading ? 'Fetching...' : 'Use Current Weather';
     }
 });
-
 
