@@ -7,22 +7,24 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- The path must be absolute from the root for Vercel routing to work -->
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+    <div class="background-overlay"></div>
     <main class="app-container">
         <header class="app-header">
-            <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
+             <svg class="header-icon" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
             <h1>Solar Energy Prediction</h1>
-            <p>Adjust the parameters below or use live data to predict solar energy output.</p>
+            <p>Adjust the environmental parameters below to predict solar energy output.</p>
         </header>
 
-        <form id="prediction_form" class="prediction-form">
+        <form id="prediction-form" class="prediction-form">
             <fieldset class="form-group">
                 <legend>Atmospheric Conditions</legend>
                 <div class="slider-group">
                     <label for="temperature">Temperature</label>
-                    <input type="range" id="temperature" name="temperature" min="-20" max="50" value="25" step="0.1">
+                    <input type="range" id="temperature" name="temperature" min="-20" max="50" value="25" step="0.1" aria-describedby="temperature-value">
                     <span class="slider-value" id="temperature-value">25.0 °C</span>
                 </div>
                 <div class="input-group">
@@ -31,49 +33,53 @@
                 </div>
                 <div class="slider-group">
                     <label for="humidity">Humidity</label>
-                    <input type="range" id="humidity" name="humidity" min="0" max="100" value="60" step="1">
+                    <input type="range" id="humidity" name="humidity" min="0" max="100" value="60" step="1" aria-describedby="humidity-value">
                     <span class="slider-value" id="humidity-value">60 %</span>
                 </div>
             </fieldset>
 
             <fieldset class="form-group">
                 <legend>Wind & Time</legend>
-                <div class="slider-group">
+                 <div class="slider-group">
                     <label for="wind_direction">Wind Direction</label>
-                    <input type="range" id="wind_direction" name="wind_direction" min="0" max="360" value="180" step="1">
+                    <input type="range" id="wind_direction" name="wind_direction" min="0" max="360" value="180" step="1" aria-describedby="wind_direction-value">
                     <span class="slider-value" id="wind_direction-value">180 °</span>
                 </div>
                 <div class="slider-group">
                     <label for="wind_speed">Wind Speed</label>
-                    <input type="range" id="wind_speed" name="wind_speed" min="0" max="100" value="15" step="0.1">
+                    <input type="range" id="wind_speed" name="wind_speed" min="0" max="100" value="15" step="0.1" aria-describedby="wind_speed-value">
                     <span class="slider-value" id="wind_speed-value">15.0 km/h</span>
                 </div>
                  <div class="slider-group">
                     <label for="month">Month</label>
-                    <input type="range" id="month" name="month" min="1" max="12" value="10" step="1">
+                    <input type="range" id="month" name="month" min="1" max="12" value="10" step="1" aria-describedby="month-value">
                     <span class="slider-value" id="month-value">10</span>
                 </div>
                 <div class="slider-group">
-                    <label for="hour">Hour</label>
-                    <input type="range" id="hour" name="hour" min="0" max="23" value="14" step="1">
+                    <label for="hour">Hour of Day (24h)</label>
+                    <input type="range" id="hour" name="hour" min="0" max="23" value="14" step="1" aria-describedby="hour-value">
                     <span class="slider-value" id="hour-value">14</span>
                 </div>
             </fieldset>
             
-            <div class="button-group">
-                <button type="button" id="get-weather-button" class="secondary-button">Use Current Weather</button>
-                <button type="submit" id="predict_button" class="predict-button"><span>Predict Energy Output</span></button>
-            </div>
+            <button type="submit" id="predict-button" class="predict-button">
+                <span class="button-text">Predict Energy Output</span>
+                <span class="button-loader hidden"></span>
+            </button>
         </form>
         
-        <section id="result_container" class="result-container hidden">
+        <section id="result-container" class="result-container hidden" aria-live="polite">
             <p class="result-label">Predicted Solar Energy Output:</p>
-            <p class="prediction-value"><span id="prediction_output">--</span><span class="unit"> W/m²</span></p>
+            <p class="prediction-value">
+                <span id="prediction-output">--</span>
+                <span class="unit"> W/m²</span>
+            </p>
         </section>
 
-        <div id="error_container" class="error-container hidden"></div>
+        <div id="error-container" class="error-container hidden" role="alert"></div>
     </main>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <!-- The path must be absolute from the root for Vercel routing to work -->
+    <script src="/static/script.js"></script>
 </body>
 </html>
 

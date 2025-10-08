@@ -1,14 +1,17 @@
+// This script handles all frontend interactions for the Solar Prediction App.
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- Element Selection ---
-    const form = document.getElementById('prediction_form');
-    const predictButton = document.getElementById('predict_button');
-    const resultContainer = document.getElementById('result_container');
-    const predictionOutput = document.getElementById('prediction_output');
-    const errorContainer = document.getElementById('error_container');
-    const getWeatherButton = document.getElementById('get-weather-button');
+    const form = document.getElementById('prediction-form');
+    const predictButton = document.getElementById('predict-button');
+    const buttonText = predictButton.querySelector('.button-text');
+    const buttonLoader = predictButton.querySelector('.button-loader');
+    const resultContainer = document.getElementById('result-container');
+    const predictionOutput = document.getElementById('prediction-output');
+    const errorContainer = document.getElementById('error-container');
 
-    // --- Slider UI Update Logic ---
+    // --- Slider UI Configuration & Initialization ---
     const sliders = [
         { id: 'temperature', unit: ' °C', decimals: 1 },
         { id: 'humidity', unit: ' %', decimals: 0 },
@@ -18,73 +21,30 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'hour', unit: '', decimals: 0 },
     ];
 
-    sliders.forEach(sliderInfo => {
-        const slider = document.getElementById(sliderInfo.id);
-        const valueSpan = document.getElementById(`${sliderInfo.id}-value`);
-        if (slider && valueSpan) {
-            slider.addEventListener('input', () => {
-                updateSliderValue(slider, valueSpan, sliderInfo.unit, sliderInfo.decimals);
+    sliders.forEach(sliderConfig => {
+        const sliderElement = document.getElementById(sliderConfig.id);
+        const valueElement = document.getElementById(`${sliderConfig.id}-value`);
+        if (sliderElement && valueElement) {
+            // Add event listener to update the displayed value when the slider is moved
+            sliderElement.addEventListener('input', () => {
+                const value = parseFloat(sliderElement.value).toFixed(sliderConfig.decimals);
+                valueElement.textContent = `${value}${sliderConfig.unit}`;
             });
         }
     });
-    
-    // --- Get Current Weather ---
-    getWeatherButton.addEventListener('click', async () => {
-        setWeatherButtonLoading(true);
-        hideMessages();
 
-        navigator.geolocation.getCurrentPosition(async (position) => {
-            const { latitude, longitude } = position.coords;
-            const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_direction_10m`;
-
-            try {
-                const response = await fetch(apiUrl);
-                const data = await response.json();
-                
-                if (data && data.current) {
-                    const weather = data.current;
-                    // Update form with weather data
-                    updateFormValue('temperature', weather.temperature_2m);
-                    updateFormValue('pressure', weather.pressure_msl);
-                    updateFormValue('humidity', weather.relative_humidity_2m);
-                    updateFormValue('wind_speed', weather.wind_speed_10m);
-                    updateFormValue('wind_direction', weather.wind_direction_10m);
-
-                    // Update time sliders to current time
-                    const now = new Date();
-                    updateFormValue('month', now.getMonth() + 1); // JS months are 0-11
-                    updateFormValue('hour', now.getHours());
-                } else {
-                    displayError('Could not retrieve current weather data.');
-                }
-
-            } catch (error) {
-                console.error("Weather API Error:", error);
-                displayError('Failed to fetch weather data. Check your connection.');
-            } finally {
-                setWeatherButtonLoading(false);
-            }
-
-        }, (error) => {
-            console.error("Geolocation Error:", error);
-            displayError('Geolocation is required to get current weather. Please enable it in your browser.');
-            setWeatherButtonLoading(false);
-        });
-    });
-
-    // --- Event Listener for Form Submission ---
+    // --- Main Event Listener for Form Submission ---
     form.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Stop the default form submission
-
+        event.preventDefault(); // Prevent the browser's default form submission
         setLoadingState(true);
         hideMessages();
 
-        // --- Data Collection from Form ---
         const formData = new FormData(form);
         const payload = Object.fromEntries(formData.entries());
 
         // --- API Call to Backend ---
         try {
+            // The '/predict' endpoint is routed by vercel.json to our Python function
             const response = await fetch('/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -94,62 +54,51 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
 
             if (response.ok) {
-                const hour = parseInt(payload.hour);
-                if (hour < 6 || hour > 19) {
-                    displayPrediction(0);
-                } else {
-                    displayPrediction(result.prediction);
-                }
-
+                // Check if it's nighttime (e.g., before 6 AM or after 7 PM)
+                const hour = parseInt(payload.hour, 10);
+                const isNight = hour < 6 || hour > 19;
+                
+                // Override prediction to 0 if it's nighttime
+                const finalPrediction = isNight ? 0 : result.prediction;
+                displayPrediction(finalPrediction);
             } else {
+                // Display the error message from the server
                 displayError(result.error || 'An unknown server error occurred.');
             }
         } catch (error) {
-            displayError('Could not connect to the prediction server. Is it running?');
+            console.error("Fetch Error:", error);
+            displayError('Could not connect to the prediction server. Please check your connection and try again.');
         } finally {
             setLoadingState(false);
         }
     });
 
     // --- UI Helper Functions ---
-    function updateFormValue(id, value) {
-        const input = document.getElementById(id);
-        if (input) {
-            input.value = Math.round(value * 10) / 10; // Round to 1 decimal place
-            // Manually trigger the input event to update the slider's display value
-            input.dispatchEvent(new Event('input'));
-        }
-    }
-    
-    function updateSliderValue(slider, valueSpan, unit, decimals) {
-        const value = parseFloat(slider.value).toFixed(decimals);
-        valueSpan.textContent = `${value}${unit}`;
-    }
 
+    /** Displays the prediction result in the UI. */
     function displayPrediction(value) {
         const formattedValue = Number.parseFloat(value).toFixed(2);
         predictionOutput.textContent = formattedValue;
         resultContainer.classList.remove('hidden');
     }
 
+    /** Displays an error message in the UI. */
     function displayError(message) {
         errorContainer.textContent = message;
         errorContainer.classList.remove('hidden');
     }
 
+    /** Hides both the result and error containers. */
     function hideMessages() {
         resultContainer.classList.add('hidden');
         errorContainer.classList.add('hidden');
     }
 
+    /** Toggles the button's state between loading and active. */
     function setLoadingState(isLoading) {
         predictButton.disabled = isLoading;
-        predictButton.innerHTML = isLoading ? '<span>Predicting...</span>' : '<span>Predict Energy Output</span>';
-    }
-
-    function setWeatherButtonLoading(isLoading) {
-        getWeatherButton.disabled = isLoading;
-        getWeatherButton.textContent = isLoading ? 'Fetching...' : 'Use Current Weather';
+        buttonText.classList.toggle('hidden', isLoading);
+        buttonLoader.classList.toggle('hidden', !isLoading);
     }
 });
 

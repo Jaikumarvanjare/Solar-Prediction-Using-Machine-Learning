@@ -1,0 +1,36 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "api/index.py",
+            "use": "@vercel/python",
+            "config": { 
+                "maxLambdaSize": "15mb",
+                "pythonVersion": "3.10" 
+            }
+        },
+        {
+            "src": "static/**",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "templates/**",
+            "use": "@vercel/static"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/static/(.*)",
+            "dest": "/static/$1"
+        },
+        {
+            "src": "/predict",
+            "dest": "/api/index.py"
+        },
+        { 
+            "src": "/(.*)", 
+            "dest": "/templates/index.html" 
+        }
+    ]
+}
+
