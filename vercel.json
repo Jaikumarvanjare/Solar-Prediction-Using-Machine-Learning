@@ -5,8 +5,8 @@
             "src": "api/index.py",
             "use": "@vercel/python",
             "config": {
-                "maxLambdaSize": "15mb",
-                "pythonVersion": "3.10"
+                "maxLambdaSize": "45mb",
+                "pythonVersion": "3.9"
             }
         },
         {
@@ -33,3 +33,4 @@
         }
     ]
 }
+
