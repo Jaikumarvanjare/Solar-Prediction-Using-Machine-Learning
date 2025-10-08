@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    // --- Element Selection ---
     const form = document.getElementById('prediction_form');
     const predictButton = document.getElementById('predict_button');
     const resultContainer = document.getElementById('result_container');
@@ -7,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorContainer = document.getElementById('error_container');
     const getWeatherButton = document.getElementById('get-weather-button');
 
+    // --- Slider UI Update Logic ---
     const sliders = [
         { id: 'temperature', unit: ' °C', decimals: 1 },
         { id: 'humidity', unit: ' %', decimals: 0 },
@@ -26,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
+    // --- Get Current Weather ---
     getWeatherButton.addEventListener('click', async () => {
         setWeatherButtonLoading(true);
         hideMessages();
@@ -40,12 +43,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (data && data.current) {
                     const weather = data.current;
+                    // Update form with weather data
                     updateFormValue('temperature', weather.temperature_2m);
                     updateFormValue('pressure', weather.pressure_msl);
                     updateFormValue('humidity', weather.relative_humidity_2m);
                     updateFormValue('wind_speed', weather.wind_speed_10m);
                     updateFormValue('wind_direction', weather.wind_direction_10m);
 
+                    // Update time sliders to current time
                     const now = new Date();
                     updateFormValue('month', now.getMonth() + 1); // JS months are 0-11
                     updateFormValue('hour', now.getHours());
@@ -67,16 +72,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // --- Event Listener for Form Submission ---
     form.addEventListener('submit', async (event) => {
         event.preventDefault(); // Stop the default form submission
 
         setLoadingState(true);
         hideMessages();
 
+        // --- Data Collection from Form ---
         const formData = new FormData(form);
         const payload = Object.fromEntries(formData.entries());
 
+        // --- API Call to Backend ---
         try {
+            // IMPORTANT: The URL for the API endpoint is now just /predict
             const response = await fetch('/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -103,10 +112,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- UI Helper Functions ---
     function updateFormValue(id, value) {
         const input = document.getElementById(id);
         if (input) {
             input.value = Math.round(value * 10) / 10; // Round to 1 decimal place
+            // Manually trigger the input event to update the slider's display value
             input.dispatchEvent(new Event('input'));
         }
     }
@@ -142,4 +153,5 @@ document.addEventListener('DOMContentLoaded', () => {
         getWeatherButton.textContent = isLoading ? 'Fetching...' : 'Use Current Weather';
     }
 });
+
 
