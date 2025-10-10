@@ -1,39 +1,45 @@
-/* --- Global Resets and Font Imports --- */
+/* --- CSS Variables for Easy Theming --- */
 :root {
-    --bg-dark: #0f172a;
-    --surface-dark: rgba(30, 41, 59, 0.9);
-    --border-dark: rgba(71, 85, 105, 0.5);
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
+    --bg-dark: #0f172a; /* Dark blue-gray background */
+    --surface-dark: rgba(30, 41, 59, 0.85); /* Semi-transparent surface color */
+    --border-dark: rgba(71, 85, 105, 0.4);
+    --text-primary: #f1f5f9; /* Off-white for primary text */
+    --text-secondary: #94a3b8; /* Lighter gray for secondary text */
     --accent-blue: #38bdf8;
     --accent-blue-dark: #2563eb;
-    --accent-green: #34d399;
-    --accent-red: #f43f5e;
+    --accent-green: #34d399; /* For successful prediction values */
+    --accent-red: #f43f5e; /* For error messages */
     --font-family: 'Poppins', sans-serif;
+    --shadow-color: rgba(0, 0, 0, 0.5);
+    --shadow-color-light: rgba(56, 189, 248, 0.25);
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* --- Global Resets and Body Styling --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-/* --- General Body and Background --- */
 body {
     font-family: var(--font-family);
     background-color: var(--bg-dark);
     color: var(--text-secondary);
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: flex-start; /* Aligns content to the top */
     min-height: 100vh;
-    padding: 2rem 1rem;
+    padding: 2rem 1rem; /* Responsive padding */
 }
 
 .background-overlay {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background-image: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), url('https://images.pexels.com/photos/159397/solar-panel-array-power-sun-electricity-159397.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
+    background-image: linear-gradient(rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.88)), url('https://images.pexels.com/photos/159397/solar-panel-array-power-sun-electricity-159397.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
     background-size: cover;
     background-position: center;
-    z-index: -1;
+    z-index: -1; /* Places the overlay behind all other content */
 }
 
 /* --- Main Application Container --- */
@@ -41,28 +47,50 @@ body {
     width: 100%;
     max-width: 800px;
     background: var(--surface-dark);
-    backdrop-filter: blur(12px);
-    padding: clamp(1.5rem, 5vw, 2.5rem);
+    backdrop-filter: blur(15px); /* Frosted glass effect */
+    padding: clamp(1.5rem, 5vw, 2.5rem); /* Responsive padding */
     border-radius: 1rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 25px 50px -12px var(--shadow-color);
     border: 1px solid var(--border-dark);
 }
 
 /* --- Header Section --- */
-.app-header { text-align: center; margin-bottom: 2.5rem; }
-.header-icon { width: 3rem; height: 3rem; color: #f59e0b; margin-bottom: 1rem; }
-.app-header h1 { font-weight: 600; color: var(--text-primary); margin: 0 0 0.5rem; font-size: clamp(1.5rem, 4vw, 1.8rem); }
-.app-header p { font-size: 1rem; max-width: 45ch; margin: 0 auto; }
+.app-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+.header-icon {
+    width: 3rem;
+    height: 3rem;
+    color: #f59e0b; /* A warm yellow for the sun icon */
+    margin-bottom: 1rem;
+}
+.app-header h1 {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.5rem, 4vw, 1.8rem); /* Responsive font size */
+}
+.app-header p {
+    font-size: 1rem;
+    max-width: 60ch; /* Improves readability */
+    margin: 0 auto;
+}
 
-/* --- Form Grouping and Layout --- */
-.prediction-form { display: flex; flex-direction: column; gap: 2rem; }
+/* --- Form Layout and Styling --- */
+.prediction-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
 .form-group {
-    border: 1px solid #475569;
+    border: 1px solid var(--border-dark);
     padding: 1.5rem;
     border-radius: 0.75rem;
     display: grid;
+    /* Responsive grid: 1 column on small screens, more on larger screens */
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.5rem;
+    gap: 1.5rem 2rem;
     position: relative;
     margin-top: 0.75rem;
 }
@@ -75,19 +103,43 @@ body {
 }
 
 /* --- Input & Slider Group Styling --- */
-.input-group, .slider-group { display: flex; flex-direction: column; gap: 0.75rem; }
-label { font-weight: 500; font-size: 0.95rem; color: var(--text-primary); }
-
-/* Standard Number Input */
-input[type="number"] {
-    background-color: #334155; color: var(--text-primary); border: 1px solid #475569;
-    padding: 0.75rem 1rem; border-radius: 0.5rem; font-size: 1rem;
-    font-family: var(--font-family); transition: all 0.2s ease-in-out;
+.input-group, .slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
-input[type="number"]:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25); }
+label {
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+/* Number Input */
+input[type="number"] {
+    background-color: #334155;
+    color: var(--text-primary);
+    border: 1px solid #475569;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-family: var(--font-family);
+    transition: all 0.2s ease-in-out;
+    -webkit-appearance: none;
+    appearance: none;
+}
+input[type="number"]:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px var(--shadow-color-light);
+}
 
 /* Slider Controls */
-.slider-value { color: var(--text-primary); font-weight: 500; font-size: 1rem; text-align: right; }
+.slider-value {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 1rem;
+    text-align: right;
+}
 input[type="range"] {
     -webkit-appearance: none; appearance: none;
     width: 100%; height: 0.5rem; background: #475569;
@@ -97,34 +149,77 @@ input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none; appearance: none;
     width: 1.25rem; height: 1.25rem; background: var(--accent-blue);
     cursor: pointer; border-radius: 50%; border: 3px solid var(--bg-dark);
+    transition: transform 0.2s ease;
 }
-input[type="range"]::-moz-range-thumb {
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+}
+input[type="range"]::-moz-range-thumb { /* Firefox */
     width: 1.25rem; height: 1.25rem; background: var(--accent-blue);
     cursor: pointer; border-radius: 50%; border: 3px solid var(--bg-dark);
 }
 
 /* --- Button Styling --- */
 .predict-button {
-    color: white; font-size: 1.1rem;
-    font-weight: 600; border: none; padding: 1rem; border-radius: 0.5rem; cursor: pointer;
-    transition: all 0.3s ease; text-align: center;
+    color: white; font-size: 1.1rem; font-weight: 600;
+    border: none; padding: 1rem; border-radius: 0.5rem; cursor: pointer;
+    transition: all 0.3s ease;
     background: linear-gradient(45deg, var(--accent-blue-dark), var(--accent-blue));
-    box-shadow: 0 4px 15px rgba(56, 189, 248, 0.2);
+    box-shadow: 0 4px 15px var(--shadow-color-light);
     margin-top: 1rem;
     display: flex; align-items: center; justify-content: center;
 }
-.predict-button:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(56, 189, 248, 0.3); }
-.predict-button:disabled { background: #475569; cursor: not-allowed; }
+.predict-button:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.35);
+}
+.predict-button:disabled {
+    background: #475569;
+    cursor: not-allowed;
+    transform: none;
+}
 
 /* --- Result & Error Display --- */
-.result-container, .error-container { text-align: center; margin-top: 1.5rem; padding: 1.5rem; border-radius: 0.5rem; transition: all 0.5s ease-out; }
-.result-container { background-color: rgba(51, 65, 85, 0.7); border: 1px solid #475569; }
-.error-container { background-color: rgba(225, 29, 72, 0.2); border: 1px solid rgba(244, 63, 94, 0.5); color: #fecdd3; font-weight: 500; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-.result-container:not(.hidden), .error-container:not(.hidden) { animation: fadeIn 0.5s ease-out forwards; }
-.result-label { font-size: 1rem; margin: 0 0 0.5rem; }
-.prediction-value { font-size: 2.8rem; font-weight: 600; color: var(--accent-green); }
-.prediction-value .unit { font-size: 1.2rem; font-weight: 400; color: #64748b; margin-left: 0.5rem; }
+.result-container, .error-container {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.5s ease-out;
+}
+.result-container {
+    background-color: rgba(52, 211, 153, 0.1);
+    border: 1px solid rgba(52, 211, 153, 0.4);
+}
+.error-container {
+    background-color: rgba(244, 63, 94, 0.15);
+    border: 1px solid rgba(244, 63, 94, 0.4);
+    color: #fecdd3;
+    font-weight: 500;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.result-container:not(.hidden), .error-container:not(.hidden) {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+.result-label {
+    font-size: 1rem;
+    margin: 0 0 0.5rem;
+    color: var(--text-secondary);
+}
+.prediction-value {
+    font-size: 2.8rem;
+    font-weight: 600;
+    color: var(--accent-green);
+}
+.prediction-value .unit {
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-left: 0.5rem;
+}
 
 /* --- Utility Classes --- */
 .hidden { display: none !important; }

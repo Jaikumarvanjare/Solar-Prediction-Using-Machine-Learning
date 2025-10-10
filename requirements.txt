@@ -1,8 +1,4 @@
-Flask==2.2.2
-numpy==1.21.6
-scikit-learn==1.0.2
-pandas==1.3.5
+Flask
+numpy
+tensorflow
 gunicorn
-Werkzeug==2.2.2
-tensorflow==2.10.0
-keras==2.10.0

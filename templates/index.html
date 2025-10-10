@@ -3,23 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solar Energy Prediction</title>
+    <title>Solar Energy Prediction Dashboard</title>
+    
+    <!-- Google Fonts: Poppins for a modern look -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- The path must be absolute from the root for Vercel routing to work -->
-    <link rel="stylesheet" href="/static/style.css">
+    
+    <!-- Link to the stylesheet. Flask serves this from the 'static' folder. -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <!-- Background image and gradient overlay -->
     <div class="background-overlay"></div>
+
     <main class="app-container">
         <header class="app-header">
-             <svg class="header-icon" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
+             <!-- SVG Icon for a visual touch -->
+             <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+             </svg>
             <h1>Solar Energy Prediction</h1>
-            <p>Adjust the environmental parameters below to predict solar energy output.</p>
+            <p>Adjust the environmental parameters below to predict the solar energy output.</p>
         </header>
 
         <form id="prediction-form" class="prediction-form">
+            <!-- Grouping related fields together improves usability -->
             <fieldset class="form-group">
                 <legend>Atmospheric Conditions</legend>
                 <div class="slider-group">
@@ -28,8 +37,8 @@
                     <span class="slider-value" id="temperature-value">25.0 °C</span>
                 </div>
                 <div class="input-group">
-                    <label for="pressure">Pressure (hPa)</label>
-                    <input type="number" id="pressure" name="pressure" value="1012" required step="any">
+                    <label for="pressure">Atmospheric Pressure (hPa)</label>
+                    <input type="number" id="pressure" name="pressure" value="1012" required step="any" placeholder="e.g., 1012">
                 </div>
                 <div class="slider-group">
                     <label for="humidity">Humidity</label>
@@ -39,7 +48,7 @@
             </fieldset>
 
             <fieldset class="form-group">
-                <legend>Wind & Time</legend>
+                <legend>Wind & Time Parameters</legend>
                  <div class="slider-group">
                     <label for="wind_direction">Wind Direction</label>
                     <input type="range" id="wind_direction" name="wind_direction" min="0" max="360" value="180" step="1" aria-describedby="wind_direction-value">
@@ -51,12 +60,12 @@
                     <span class="slider-value" id="wind_speed-value">15.0 km/h</span>
                 </div>
                  <div class="slider-group">
-                    <label for="month">Month</label>
+                    <label for="month">Month of the Year</label>
                     <input type="range" id="month" name="month" min="1" max="12" value="10" step="1" aria-describedby="month-value">
                     <span class="slider-value" id="month-value">10</span>
                 </div>
                 <div class="slider-group">
-                    <label for="hour">Hour of Day (24h)</label>
+                    <label for="hour">Hour of the Day (24h)</label>
                     <input type="range" id="hour" name="hour" min="0" max="23" value="14" step="1" aria-describedby="hour-value">
                     <span class="slider-value" id="hour-value">14</span>
                 </div>
@@ -64,10 +73,12 @@
             
             <button type="submit" id="predict-button" class="predict-button">
                 <span class="button-text">Predict Energy Output</span>
+                <!-- This loader is shown during the API call -->
                 <span class="button-loader hidden"></span>
             </button>
         </form>
         
+        <!-- This section will display the prediction result -->
         <section id="result-container" class="result-container hidden" aria-live="polite">
             <p class="result-label">Predicted Solar Energy Output:</p>
             <p class="prediction-value">
@@ -76,10 +87,12 @@
             </p>
         </section>
 
+        <!-- This container is used to show any errors from the server -->
         <div id="error-container" class="error-container hidden" role="alert"></div>
     </main>
-    <!-- The path must be absolute from the root for Vercel routing to work -->
-    <script src="/static/script.js"></script>
+
+    <!-- Link to the JavaScript file. 'defer' ensures it runs after the HTML is parsed. -->
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </body>
 </html>
 

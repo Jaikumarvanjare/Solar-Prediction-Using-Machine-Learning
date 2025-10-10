@@ -1,38 +1,39 @@
 # This is your Flask application.
-# For Render, it MUST be in the root folder and named 'app.py'.
+# It handles the web server, loads the machine learning model,
+# and provides an API endpoint for predictions.
 
 from flask import Flask, request, jsonify, render_template
 import pickle
 import numpy as np
 import logging
 
-# --- App Initialization ---
-# When app.py is in the root, Flask automatically finds the 'static' and 'templates' folders.
+# --- 1. App Initialization ---
 app = Flask(__name__)
 
-# --- Logging Configuration ---
-# Set up basic logging to see informational messages and errors in Render's logs.
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# --- 2. Logging Configuration ---
+# This helps you see what's happening in the terminal when the app is running.
+logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(levelname)s | %(message)s')
 
-# --- Load Machine Learning Model ---
-# We wrap this in a try-except block to gracefully handle any issues on startup.
+# --- 3. Load Machine Learning Model ---
+# We load the model once when the server starts to avoid reloading it on every request.
 try:
-    # Load the model from the root directory.
+    # Ensure 'model.pkl' is in the same directory as this 'app.py' file.
     model = pickle.load(open('model.pkl', 'rb'))
-    app.logger.info("Machine learning model loaded successfully.")
+    app.logger.info("✅ Machine learning model loaded successfully.")
 except FileNotFoundError:
-    app.logger.error("FATAL: model.pkl not found in the root directory. The app cannot make predictions.")
+    app.logger.error("❌ FATAL: 'model.pkl' not found. The app cannot make predictions.")
     model = None
 except Exception as e:
-    app.logger.error(f"FATAL: An unexpected error occurred while loading the model: {e}")
+    app.logger.error(f"❌ FATAL: An unexpected error occurred while loading the model: {e}")
     model = None
 
-# --- Application Routes ---
+# --- 4. Application Routes ---
 
 @app.route('/')
 def home():
     """
-    Serves the main index.html page when a user visits the root URL.
+    Serves the main HTML page when a user visits the root URL.
+    Flask automatically looks for this file in a 'templates' folder.
     """
     app.logger.info("Serving the main page: index.html")
     return render_template('index.html')
@@ -41,21 +42,22 @@ def home():
 def predict():
     """
     This is the core API endpoint. It receives data from the frontend,
-    runs the prediction using the loaded model, and returns the result as JSON.
+    runs a prediction, and returns the result as JSON.
     """
     app.logger.info("Received a request on the /predict endpoint.")
-    
+
     # First, check if the model was loaded correctly on startup.
-    if not model:
-        return jsonify({'error': 'The machine learning model is not available. Check server logs.'}), 500
+    if model is None:
+        error_msg = "The machine learning model is not available. Check server logs for errors."
+        return jsonify({'error': error_msg}), 500
 
     try:
         # Get the JSON data sent from the frontend's fetch request.
         data = request.get_json()
-        app.logger.info(f"Received data for prediction: {data}")
+        app.logger.info(f"Received data: {data}")
 
-        # The order of features here MUST EXACTLY match the order your model was trained on.
-        # This creates the list of numbers that the model expects.
+        # IMPORTANT: The order of features here MUST EXACTLY match the
+        # order your model was trained on.
         features = [
             float(data['temperature']),
             float(data['pressure']),
@@ -65,21 +67,31 @@ def predict():
             int(data['month']),
             int(data['hour'])
         ]
-        app.logger.info(f"Features successfully prepared for model: {features}")
-        
-        # Use numpy to convert the list to the correct shape for scikit-learn.
+
+        # Use numpy to convert the list to the 2D array shape the model expects.
         final_features = np.array(features).reshape(1, -1)
-        
-        # Make the actual prediction.
+
+        # Make the prediction.
         prediction_result = model.predict(final_features)
-        
+
         # Format the result and send it back to the frontend.
-        output = round(prediction_result[0], 2)
+        # Keras models often return a nested array, so we access with [0][0].
+        output = round(float(prediction_result[0][0]), 2)
         app.logger.info(f"Prediction successful. Result: {output}")
         return jsonify({'prediction': output})
 
+    except KeyError as e:
+        error_msg = f"Missing data for prediction: {e}. Check if all form fields are being sent."
+        app.logger.error(error_msg)
+        return jsonify({'error': error_msg}), 400
     except Exception as e:
-        # If any error occurs during the process, log it and return a generic error message.
+        # Catch any other errors during the process.
         app.logger.error(f"An error occurred during prediction: {e}")
-        return jsonify({'error': 'An internal error occurred during prediction.'}), 500
+        return jsonify({'error': 'An internal server error occurred.'}), 500
+
+# --- 5. Run the App ---
+# This block allows you to run the app directly using 'python app.py'
+if __name__ == '__main__':
+    # debug=True will auto-reload the server when you save changes and provides better error pages.
+    app.run(debug=True)
 
